@@ -25,6 +25,8 @@
 # define PKGCONF_CACHE_INODES
 #endif
 
+#include <glob.h>
+
 static bool
 #ifdef PKGCONF_CACHE_INODES
 path_list_contains_entry(const pkgconf_buffer_t *text, pkgconf_list_t *dirlist, struct stat *st)
@@ -187,7 +189,9 @@ pkgconf_path_prepend(const char *text, pkgconf_list_t *dirlist, bool filter)
  *
  * .. c:function:: size_t pkgconf_path_split(const char *text, pkgconf_list_t *dirlist)
  *
- *    Splits a given text input and inserts paths into a path list.
+ *    Splits a given text input and inserts paths into a path list.  An
+ *    element with a path component that is exactly ``*`` is replaced by
+ *    the directories it matches, in byte order.
  *
  *    :param char* text: The path text to split and add as path nodes.
  *    :param pkgconf_list_t* dirlist: The path list to have the path nodes added to.
@@ -195,6 +199,30 @@ pkgconf_path_prepend(const char *text, pkgconf_list_t *dirlist, bool filter)
  *    :return: number of path nodes added to the path list
  *    :rtype: size_t
  */
+/*
+ * Adds the directories one search-list element names.  A path component
+ * that is exactly "*" stands for every directory it matches, in byte order
+ * (Fluffy searches each package's lib/pkgconfig that way, with "*" in
+ * place of the package): glob()'s GLOB_PATHS applies the same rule as
+ * execvp and the dynamic loader, and GLOB_NOMAGIC keeps an element without
+ * one as it is, whether or not it exists.
+ */
+static size_t
+path_add_element(const char *element, pkgconf_list_t *dirlist, bool filter)
+{
+	glob_t g;
+	size_t i;
+
+	if (glob(element, GLOB_PATHS | GLOB_NOMAGIC, NULL, &g) != 0)
+		return 0;
+
+	for (i = 0; i < g.gl_pathc; i++)
+		pkgconf_path_add(g.gl_pathv[i], dirlist, filter);
+
+	globfree(&g);
+	return i;
+}
+
 size_t
 pkgconf_path_split(const char *text, pkgconf_list_t *dirlist, bool filter)
 {
@@ -210,9 +238,9 @@ pkgconf_path_split(const char *text, pkgconf_list_t *dirlist, bool filter)
 
 	while ((p = strtok(iter, PKG_CONFIG_PATH_SEP_S)) != NULL)
 	{
-		pkgconf_path_add(p, dirlist, filter);
+		count += path_add_element(p, dirlist, filter);
 
-		count++, iter = NULL;
+		iter = NULL;
 	}
 	free(workbuf);
 
