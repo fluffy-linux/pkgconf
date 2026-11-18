@@ -438,7 +438,8 @@ test_suites = [
   'bomtool',
   'spdxtool',
   'pccritic',
-  'symlink'
+  'symlink',
+  'fluffy'
 ]
 
 foreach t : test_suites

@@ -1,0 +1,7 @@
+SkipPlatforms: windows
+SetupMkdir: lit[1]
+SetupCopy: lib-fluffy/fluffy-lit.pc lit[1]/fluffy-lit.pc
+Environment: PKG_CONFIG_PATH=%PWD%/lit[1]
+Query: fluffy-lit
+WantedFlags: cflags
+ExpectedStdout: -DFLUFFY_LIT

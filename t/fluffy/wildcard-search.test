@@ -1,0 +1,17 @@
+SkipPlatforms: windows
+SetupMkdir: fsw/a/include
+SetupMkdir: fsw/a/lib/pkgconfig
+SetupMkdir: fsw/B/lib/pkgconfig
+SetupMkdir: fsw/c/include/sub
+SetupMkdir: fsw/c/share/pkgconfig
+SetupMkdir: fsw/.hid/lib/pkgconfig
+SetupCopy: lib-fluffy/fluffy-a.pc fsw/a/lib/pkgconfig/fluffy-a.pc
+SetupCopy: lib-fluffy/fluffy-dup-a.pc fsw/a/lib/pkgconfig/fluffy-dup.pc
+SetupCopy: lib-fluffy/fluffy-dup-B.pc fsw/B/lib/pkgconfig/fluffy-dup.pc
+SetupCopy: lib-fluffy/fluffy-meta.pc fsw/c/share/pkgconfig/fluffy-meta.pc
+SetupCopy: lib-fluffy/fluffy-dup-hidden.pc fsw/.hid/lib/pkgconfig/fluffy-dup.pc
+SetupCopy: lib-fluffy/fluffy-a.pc fsw/zz-1.0.squashfs
+Environment: PKG_CONFIG_PATH=%PWD%/fsw/*/lib/pkgconfig:%PWD%/fsw/*/share/pkgconfig
+Query: fluffy-a fluffy-meta
+WantedFlags: cflags libs define-prefix
+ExpectedStdout: -I%PWD%/fsw/a/include -DFLUFFY_A -I%PWD%/fsw/c/include/sub -L%PWD%/fsw/a/lib -lfluffya

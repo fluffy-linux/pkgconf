@@ -1,0 +1,9 @@
+prefix=/nonexistent
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: fluffy-lit
+Description: Fluffy /sw search fixture
+Version: 1.0
+Cflags: -DFLUFFY_LIT
+Libs: 
